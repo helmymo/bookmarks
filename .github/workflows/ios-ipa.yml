@@ -1,0 +1,81 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'simulator'
+        type: choice
+        options:
+          - simulator
+          - release
+
+jobs:
+  build-ios:
+    name: Build iOS ${{ github.inputs.build_type || 'simulator' }}
+    runs-on: macos-14
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Select Xcode
+      run: sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+    
+    - name: Show Xcode version
+      run: xcodebuild -version
+    
+    - name: Install Flutter
+      run: |
+        git clone https://github.com/flutter/flutter.git -b stable --depth 1 "$HOME/flutter"
+        echo "$HOME/flutter/bin" >> $GITHUB_PATH
+    
+    - name: Flutter version
+      run: flutter --version
+    
+    - name: Install dependencies
+      run: flutter pub get
+    
+    - name: List available simulators
+      run: xcrun simctl list devices available
+    
+    - name: Build iOS for Simulator
+      if: github.inputs.build_type == 'simulator' || github.inputs.build_type == ''
+      run: flutter build ios --simulator --no-codesign
+    
+    - name: Build iOS for Release (Ad Hoc)
+      if: github.inputs.build_type == 'release'
+      run: |
+        # Create certificate file
+        echo "$CERTIFICATES" | base64 --decode -o certificates.p12
+        
+        # Import certificate
+        keychain unlock -p $KEYCHAIN_PASSWORD login.keychain-db
+        security import certificates.p12 -P $CERTIFICATE_PASSWORD -A
+        
+        # Build for release
+        flutter build ipa --release
+    
+    - name: Verify build output
+      run: |
+        ls -la build/ios/iphonesimulator/ 2>/dev/null || ls -la build/ios/ipa/
+    
+    - name: Upload Simulator Build
+      if: github.inputs.build_type == 'simulator' || github.inputs.build_type == ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: ios-simulator-app
+        path: build/ios/iphonesimulator/Runner.app
+        retention-days: 5
+    
+    - name: Upload Release IPA
+      if: github.inputs.build_type == 'release'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ios-release-ipa
+        path: build/ios/ipa/*.ipa
+        retention-days: 30
