@@ -4,19 +4,10 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
-    inputs:
-      build_type:
-        description: 'Build type'
-        required: true
-        default: 'simulator'
-        type: choice
-        options:
-          - simulator
-          - release
 
 jobs:
   build-ios:
-    name: Build iOS ${{ github.inputs.build_type || 'simulator' }}
+    name: Build iOS IPA
     runs-on: macos-14
     
     steps:
@@ -44,38 +35,25 @@ jobs:
       run: xcrun simctl list devices available
     
     - name: Build iOS for Simulator
-      if: github.inputs.build_type == 'simulator' || github.inputs.build_type == ''
       run: flutter build ios --simulator --no-codesign
     
-    - name: Build iOS for Release (Ad Hoc)
-      if: github.inputs.build_type == 'release'
+    - name: Create IPA from Simulator Build
       run: |
-        # Create certificate file
-        echo "$CERTIFICATES" | base64 --decode -o certificates.p12
+        # Create Payload directory
+        mkdir -p Payload
+        cp -r build/ios/iphonesimulator/Runner.app Payload/
         
-        # Import certificate
-        keychain unlock -p $KEYCHAIN_PASSWORD login.keychain-db
-        security import certificates.p12 -P $CERTIFICATE_PASSWORD -A
+        # Create IPA
+        cd Payload
+        zip -r ../Runner.app.ipa . -r
+        cd ..
         
-        # Build for release
-        flutter build ipa --release
+        # Show IPA info
+        ls -la *.ipa
     
-    - name: Verify build output
-      run: |
-        ls -la build/ios/iphonesimulator/ 2>/dev/null || ls -la build/ios/ipa/
-    
-    - name: Upload Simulator Build
-      if: github.inputs.build_type == 'simulator' || github.inputs.build_type == ''
+    - name: Upload IPA
       uses: actions/upload-artifact@v4
       with:
-        name: ios-simulator-app
-        path: build/ios/iphonesimulator/Runner.app
-        retention-days: 5
-    
-    - name: Upload Release IPA
-      if: github.inputs.build_type == 'release'
-      uses: actions/upload-artifact@v4
-      with:
-        name: ios-release-ipa
-        path: build/ios/ipa/*.ipa
+        name: universal-bookmarks-ipa
+        path: Runner.app.ipa
         retention-days: 30
