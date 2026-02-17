@@ -37,23 +37,29 @@ jobs:
     - name: Build iOS for Simulator
       run: flutter build ios --simulator --no-codesign
     
-    - name: Create IPA from Simulator Build
+    - name: Create IPA Package
       run: |
-        # Create Payload directory
-        mkdir -p Payload
-        cp -r build/ios/iphonesimulator/Runner.app Payload/
+        # Get the app path
+        APP_PATH="build/ios/iphonesimulator/Runner.app"
         
-        # Create IPA
+        # Create proper IPA structure
+        mkdir -p Payload
+        cp -r "$APP_PATH" Payload/
+        
+        # Create the IPA using zip (proper format)
         cd Payload
-        zip -r ../Runner.app.ipa . -r
+        zip -r ../Runner.ipa * -r
         cd ..
         
-        # Show IPA info
+        # Verify the IPA was created
         ls -la *.ipa
+        
+        # Check IPA contents
+        unzip -l Runner.ipa
     
     - name: Upload IPA
       uses: actions/upload-artifact@v4
       with:
         name: universal-bookmarks-ipa
-        path: Runner.app.ipa
+        path: Runner.ipa
         retention-days: 30
