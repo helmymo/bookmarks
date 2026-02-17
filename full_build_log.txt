@@ -1,0 +1,66 @@
+﻿Running Gradle task 'assembleRelease'...                        
+flutter.bat : 'C:\Users\Monkey' is not recognized 
+as an internal or external command,
+At line:1 char:1
++ & "C:\Users\Monkey Nerd\Downloads\New 
+folder\tools\flutter\bin\flutte ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ('C:\ 
+   Users\Monke...ternal command,:String) [], Rem  
+  oteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+operable program or batch file.
+
+Building native assets for package:objective_c 
+failed.
+Compilation of hook returned with exit code: 1.
+To reproduce run:
+C:\Users\Monkey Nerd\Downloads\New 
+folder\tools\flutter\bin\cache\dart-sdk\bin\dart 
+compile kernel '--packages=C:\Users\Monkey 
+Nerd\Downloads\New folder 
+(3)\.dart_tool\package_config.json' 
+'--output=C:\Users\Monkey Nerd\Downloads\New 
+folder (3)\.dart_tool\hooks_runner\objective_c\d1e
+88c8cf118f390fcd94f41af0f2479\hook.dill' 
+'--depfile=C:\Users\Monkey Nerd\Downloads\New 
+folder (3)\.dart_tool\hooks_runner\objective_c\d1e
+88c8cf118f390fcd94f41af0f2479\hook.dill.d' 
+'C:\Users\Monkey Nerd\AppData\Local\Pub\Cache\host
+ed\pub.dev\objective_c-9.3.0\hook\build.dart'
+stderr:
+'C:\Users\Monkey' is not recognized as an 
+internal or external command,
+operable program or batch file.
+
+stdout:
+
+
+Target dart_build failed: Error: Building native 
+assets failed. See the logs for more details.
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task 
+':app:compileFlutterBuildRelease'.
+> Process 'command 'C:\Users\Monkey 
+Nerd\Downloads\New 
+folder\tools\flutter\bin\flutter.bat'' finished 
+with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack 
+trace.
+> Run with --info or --debug option to get more 
+log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 7s
+Running Gradle task 'assembleRelease'...                            8.3s
+Gradle task assembleRelease failed with exit code 
+1
