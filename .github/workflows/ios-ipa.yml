@@ -8,58 +8,31 @@ on:
 jobs:
   build-ios:
     name: Build iOS IPA
-    runs-on: macos-14
+    runs-on: macos-latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Select Xcode
-      run: sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
-    
-    - name: Show Xcode version
-      run: xcodebuild -version
-    
     - name: Install Flutter
-      run: |
-        git clone https://github.com/flutter/flutter.git -b stable --depth 1 "$HOME/flutter"
-        echo "$HOME/flutter/bin" >> $GITHUB_PATH
-    
-    - name: Flutter version
-      run: flutter --version
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
     
     - name: Install dependencies
       run: flutter pub get
     
-    - name: List available simulators
-      run: xcrun simctl list devices available
-    
     - name: Build iOS for Simulator
       run: flutter build ios --simulator --no-codesign
     
-    - name: Create IPA Package
+    - name: Create IPA
       run: |
-        # Get the app path
-        APP_PATH="build/ios/iphonesimulator/Runner.app"
-        
-        # Create proper IPA structure
-        mkdir -p Payload
-        cp -r "$APP_PATH" Payload/
-        
-        # Create the IPA using zip (proper format)
-        cd Payload
-        zip -r ../Runner.ipa * -r
-        cd ..
-        
-        # Verify the IPA was created
-        ls -la *.ipa
-        
-        # Check IPA contents
-        unzip -l Runner.ipa
+        cd build/ios/iphonesimulator
+        zip -r ../../Runner.ipa Runner.app
     
     - name: Upload IPA
       uses: actions/upload-artifact@v4
       with:
         name: universal-bookmarks-ipa
-        path: Runner.ipa
+        path: build/Runner.ipa
         retention-days: 30
